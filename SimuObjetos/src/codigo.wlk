@@ -1,85 +1,81 @@
 class Trabajador{
 	var rol //el rol cambia ver
-	var estima	
+	var estamina	
+	var practica
 	
-	constructor (es , rolDelEmpleado){
+	constructor (es , rolDelEmpleado , practicaDeMin){
 		rol=rolDelEmpleado
-		estima = es
+		estamina = es
+		practica=practicaDeMin
 	}
 	
-	method estima()=estima
+	method estamina()=estamina
 	
 	method trabajo(algo){
-		estima -= algo
+		estamina-= algo
 	}
 	
 	method rol()=rol
+	
+	method fuerzaBase() = estamina / 2 + 2
+	
+	method fuerzaTotal() = rol.fuerza(self)
+	
+	method cambiarRol(cambio){
+		rol = cambio
+		practica = 0
+	}
+	
+	method defende(){
+		rol.defender(self)
+	}
+	
+	method defendio(puntos){
+		practica += puntos
+	}
+	
+	method comer(fruta){
+		estamina += fruta.puntos()
+	}
 }
 
 class Biclopes inherits Trabajador{
-	constructor (estimaDeBi,rol)=super(estimaDeBi.max(10),rol){}
+	constructor (estimaDeBi,rol,prac)=super(estimaDeBi.max(10),rol,prac){}
 }
 
 class Ciclopes inherits Trabajador{
+		
+	method defender(){
+		rol.defender()
+	}
 	
-	method defender(cant){
-		return cant/2
+	override method fuerzaTotal() = super() / 2
+	
+	method pierdesLaMitadEstamina(){
+		estamina /= 2
 	}
 }
 
-class Trabajo{
+class TiposDeRoles{
 	
-	method condicionesDeReparar1(empleado,tal){
-		return empleado.estima() >= tal.complejidad()
-	}
+	method defender(alguien){}
 	
-	method condicionesDeReparar2(empleado,tal){
-		return empleado.cantidadHer() >= tal.herramientasNe()
-	}
+	method fuerza(alguien) = alguien.fuerzaBase() 
 	
-	
-	method arreglarMaquina(empleado,tal){
-		if (self.condicionesDeReparar1(empleado, tal) && self.condicionesDeReparar2(empleado, tal) ){
-			empleado.trabajo(tal.complejidad())
-		}
-	}
-	
-	method defenderSector(empleado,amenaza){
-		if ((empleado.rol().estima()+2) >= amenaza){
-			empleado.defender()
-		}
-	}
+	method limpiar()
 }
 
-class Maquina{
-	var herramientasNecesarias
-	var complejidad
+class Soldado inherits TiposDeRoles{
 	
-	constructor(her,comple){
-		herramientasNecesarias= her
-		complejidad=comple
+	override method defender(alguien){
+		alguien.defendio()
 	}
 	
-	method herramientasNec()=herramientasNecesarias
-	
-	method complejidad() = complejidad
+	override method fuerza(alguien)=  super(alguien) + alguien.estamina()
+
 }
 
-class Soldado inherits Trabajo{
-	var danio
-
-	constructor (poder){
-		danio = poder
-	}
-	
-	method defender(sector){
-		danio += 2
-	}
-	
-	method poder()=danio
-}
-
-class Obrero inherits Trabajo{
+class Obrero inherits TiposDeRoles{
 	var herramientas = #{}
 	
 	method agregarHerramienta(una){
@@ -87,11 +83,27 @@ class Obrero inherits Trabajo{
 	}
 	
 	method cantidadDeHerr()= herramientas.size()
+	
+	override method fuerza(alguien){
+		alguien.pierdesLaMitadEstamina()
+		return super(alguien)
+	}
 }
 
-class Herramientas{}//ver si es necesario
-
-class Mucama inherits Trabajo{
+class Mucama inherits TiposDeRoles{
+	
+	override method fuerza(alguien){
+		return alguien.fuerzaBase()		 
+	}
 	
 }
 
+class Fruta{
+	var potencia
+	
+	constructor (recupera){
+		potencia= recupera
+	}
+	
+	method puntos() = potencia
+}
